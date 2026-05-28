@@ -25,15 +25,15 @@ export default function AquariumCanvas() {
     const app = new PIXI.Application();
 
     const initApp = async () => {
-      // Get actual container dimensions
-      const rect = canvasRef.current!.getBoundingClientRect();
-      const width = rect.width || aquariumWidth;
-      const height = rect.height || aquariumHeight;
+      // Get viewport dimensions for full screen
+      const width = window.innerWidth;
+      const height = window.innerHeight;
 
       await app.init({
         width,
         height,
-        backgroundColor: 0x1e3a5f,
+        backgroundColor: 0x3a7ca5,
+        backgroundAlpha: 0.3,
         antialias: true,
       });
 
@@ -50,21 +50,27 @@ export default function AquariumCanvas() {
         const colorNum = parseInt(fishData.color.replace("#", ""), 16);
 
         // Draw fish body
-        graphics.ellipse(0, 0, fishData.size, fishData.size * 0.6).fill(colorNum);
+        graphics
+          .ellipse(0, 0, fishData.size, fishData.size * 0.6)
+          .fill(colorNum);
 
         // Draw tail
-        graphics.poly([
-          { x: -fishData.size, y: 0 },
-          { x: -fishData.size * 1.4, y: -fishData.size * 0.3 },
-          { x: -fishData.size * 1.4, y: fishData.size * 0.3 },
-        ]).fill(colorNum);
+        graphics
+          .poly([
+            { x: -fishData.size, y: 0 },
+            { x: -fishData.size * 1.4, y: -fishData.size * 0.3 },
+            { x: -fishData.size * 1.4, y: fishData.size * 0.3 },
+          ])
+          .fill(colorNum);
 
         // Draw eye
-        graphics.circle(
-          fishData.size * 0.5,
-          -fishData.size * 0.2,
-          fishData.size * 0.1,
-        ).fill(0x000000);
+        graphics
+          .circle(
+            fishData.size * 0.5,
+            -fishData.size * 0.2,
+            fishData.size * 0.1,
+          )
+          .fill(0x000000);
 
         graphics.position.set(fishData.x, fishData.y);
         graphics.rotation = fishData.direction;
@@ -132,10 +138,8 @@ export default function AquariumCanvas() {
 
     // Handle resize
     const handleResize = () => {
-      if (!canvasRef.current) return;
-      const rect = canvasRef.current.getBoundingClientRect();
-      const width = rect.width;
-      const height = rect.height;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
       setAquariumSize(width, height);
       if (appRef.current) {
         appRef.current.renderer.resize(width, height);
@@ -186,21 +190,27 @@ export default function AquariumCanvas() {
         const colorNum = parseInt(fishData.color.replace("#", ""), 16);
 
         // Draw fish body
-        graphics.ellipse(0, 0, fishData.size, fishData.size * 0.6).fill(colorNum);
+        graphics
+          .ellipse(0, 0, fishData.size, fishData.size * 0.6)
+          .fill(colorNum);
 
         // Draw tail
-        graphics.poly([
-          { x: -fishData.size, y: 0 },
-          { x: -fishData.size * 1.4, y: -fishData.size * 0.3 },
-          { x: -fishData.size * 1.4, y: fishData.size * 0.3 },
-        ]).fill(colorNum);
+        graphics
+          .poly([
+            { x: -fishData.size, y: 0 },
+            { x: -fishData.size * 1.4, y: -fishData.size * 0.3 },
+            { x: -fishData.size * 1.4, y: fishData.size * 0.3 },
+          ])
+          .fill(colorNum);
 
         // Draw eye
-        graphics.circle(
-          fishData.size * 0.5,
-          -fishData.size * 0.2,
-          fishData.size * 0.1,
-        ).fill(0x000000);
+        graphics
+          .circle(
+            fishData.size * 0.5,
+            -fishData.size * 0.2,
+            fishData.size * 0.1,
+          )
+          .fill(0x000000);
 
         graphics.position.set(fishData.x, fishData.y);
         graphics.rotation = fishData.direction;
@@ -214,10 +224,5 @@ export default function AquariumCanvas() {
     });
   }, [fish]);
 
-  return (
-    <div
-      ref={canvasRef}
-      className="rounded-lg overflow-hidden shadow-2xl border-4 border-cyan-700 w-full h-full"
-    />
-  );
+  return <div ref={canvasRef} className="w-full h-full" />;
 }

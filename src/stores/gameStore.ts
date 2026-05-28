@@ -1,64 +1,94 @@
 import { create } from "zustand";
-import { Fish, GameState } from "@/types/game";
+import { persist } from "zustand/middleware";
+import { Fish, GameState, FISH_MODELS } from "@/types/game";
 
-const COLORS = [
-  "#FF6B6B",
-  "#4ECDC4",
-  "#45B7D1",
-  "#FFA07A",
-  "#98D8C8",
-  "#F7DC6F",
-];
+const createRandomFish = (
+  width: number,
+  height: number,
+  svgPath: string,
+  maxSpeed: number,
+  swimDirection: "normal" | "vertical" | "horizontal",
+): Fish => {
+  // Initialize direction based on swim direction type
+  let initialDirection: number;
 
-const createRandomFish = (width: number, height: number): Fish => ({
-  id: Math.random().toString(36).substr(2, 9),
-  x: Math.random() * width,
-  y: Math.random() * height,
-  speed: 0.3 + Math.random() * 0.5,
-  color: COLORS[Math.floor(Math.random() * COLORS.length)],
-  size: 20 + Math.random() * 30,
-  direction: Math.random() * Math.PI * 2,
-});
-
-export const useGameStore = create<GameState>((set) => {
-  // Initialize with 5 random fish
-  const initialFish = Array.from({ length: 5 }, () =>
-    createRandomFish(800, 600),
-  );
+  if (swimDirection === "normal") {
+    // Normal swimmers: 70% chance for mostly horizontal (within ±30° of horizontal)
+    if (Math.random() < 0.7) {
+      const baseAngle = Math.random() < 0.5 ? 0 : Math.PI;
+      initialDirection = baseAngle + (Math.random() - 0.5) * (Math.PI / 3);
+    } else {
+      initialDirection = Math.random() * Math.PI * 2;
+    }
+  } else {
+    // Vertical and horizontal swimmers: random direction (will be constrained in animation)
+    initialDirection = Math.random() * Math.PI * 2;
+  }
 
   return {
-    fish: initialFish,
-    isRunning: true,
-    aquariumWidth: 800,
-    aquariumHeight: 600,
-
-    addFish: () =>
-      set((state) => ({
-        fish: [
-          ...state.fish,
-          createRandomFish(state.aquariumWidth, state.aquariumHeight),
-        ],
-      })),
-
-    removeFish: (id: string) =>
-      set((state) => ({
-        fish: state.fish.filter((f) => f.id !== id),
-      })),
-
-    updateFish: (id: string, updates: Partial<Fish>) =>
-      set((state) => ({
-        fish: state.fish.map((f) => (f.id === id ? { ...f, ...updates } : f)),
-      })),
-
-    toggleRunning: () =>
-      set((state) => ({
-        isRunning: !state.isRunning,
-      })),
-
-    setAquariumSize: (width: number, height: number) =>
-      set({
-        aquariumWidth: width,
-        aquariumHeight: height,
-      }),
+    id: Math.random().toString(36).substr(2, 9),
+    x: Math.random() * width,
+    y: Math.random() * height,
+    speed: maxSpeed * (0.5 + Math.random() * 0.5), // Random speed: 50% to 100% of maxSpeed
   };
-});
+};
+
+export const useGameStore = create<GameState>()(
+  persist(
+    (set) => ({
+      fish: [], // Start with empty aquarium
+      isRunning: true,
+      aquariumWidth: 800,
+      aquariumHeight: 600,
+
+      addFish: (svgPath: string) =>
+        set((state) => {
+          // Find the fish model to get its max speed and swim direction
+          const model = FISH_MODELS.find((m) => m.path === svgPath);
+          const maxSpeed = model?.maxSpeed ?? 2; // Default max speed if not found
+          const swimDirection = model?.swimDirection ?? "normal"; // Default direction
+
+          return {
+            fish: [
+              ...state.fish,
+              createRandomFish(
+                state.aquariumWidth,
+                state.aquariumHeight,
+                svgPath,
+                maxSpeed,
+                swimDirection,
+              ),
+            ],
+          };
+        }),
+
+      removeFish: (id: string) =>
+        set((state) => ({
+          fish: state.fish.filter((f) => f.id !== id),
+        })),
+
+      updateFish: (id: string, updates: Partial<Fish>) =>
+        set((state) => ({
+          fish: state.fish.map((f) => (f.id === id ? { ...f, ...updates } : f)),
+        })),
+
+      toggleRunning: () =>
+        set((state) => ({
+          isRunning: !state.isRunning,
+        })),
+
+      setAquariumSize: (width: number, height: number) =>
+        set({
+          aquariumWidth: width,
+          aquariumHeight: height,
+        }),
+    }),
+    {
+      name: "aquarium-storage", // localStorage key
+      partialize: (state) => ({
+        fish: state.fish,
+        isRunning: state.isRunning,
+      }),
+    },
+  ),
+);

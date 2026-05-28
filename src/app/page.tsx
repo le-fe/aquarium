@@ -1,44 +1,54 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import Aquarium2D from "@/components/Aquarium2D";
 import GameControls from "@/components/GameControls";
-
-// Import AquariumCanvas dynamically to avoid SSR issues with PixiJS
-const AquariumCanvas = dynamic(() => import("@/components/AquariumCanvas"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-full bg-slate-800 rounded-lg">
-      <p className="text-white text-xl">Loading Aquarium...</p>
-    </div>
-  ),
-});
+import OceanBackground from "@/components/OceanBackground";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-linear-to-b from-slate-900 to-slate-800 p-6">
-      <div className="max-w-7xl mx-auto">
-        <header className="text-center mb-8">
-          <h1 className="text-5xl font-bold text-cyan-400 mb-2">
-            🐠 Aquarium Game 🐠
+    <div
+      className="fixed inset-0 overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #022244, #58c8da)" }}
+    >
+      <OceanBackground />
+
+      {/* Canvas - Full screen */}
+      <div className="absolute inset-0 z-10">
+        <Aquarium2D />
+      </div>
+
+      {/* Right Side Panel - Header and Controls */}
+      <div className="absolute top-0 right-0 h-full w-96 z-20 flex flex-col p-6 gap-6">
+        {/* Header with Glass Effect */}
+        <div
+          className="backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-white/20"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)",
+          }}
+        >
+          <h1 className="text-4xl font-bold text-white mb-3 text-center">
+            🐠 Aquarium 🐠
           </h1>
-          <p className="text-cyan-200 text-lg">
-            Watch your fish swim around in their virtual habitat!
-          </p>
-        </header>
+        </div>
 
-        <main className="flex flex-col gap-6">
+        {/* Game Controls with Glass Effect - Scrollable */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           <GameControls />
+        </div>
 
-          <div className="w-full h-[600px]">
-            <AquariumCanvas />
-          </div>
-        </main>
-
-        <footer className="text-center mt-8 text-cyan-300 text-sm">
-          <p>
-            Built with Next.js, TypeScript, Tailwind CSS, Zustand, and PixiJS
+        {/* Footer with Glass Effect */}
+        <div
+          className="backdrop-blur-xl rounded-2xl p-4 shadow-2xl border border-white/20"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)",
+          }}
+        >
+          <p className="text-white/80 text-xs text-center leading-relaxed">
+            Built with Next.js, TypeScript, Tailwind CSS, and Zustand
           </p>
-        </footer>
+        </div>
       </div>
     </div>
   );
