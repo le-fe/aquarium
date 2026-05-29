@@ -8,8 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-montserrat);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,7 +21,13 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+/* Fishing Net Cursor */
+.fishing-net-cursor,
+.fishing-net-cursor * {
+  cursor: url('/icons/fishing-net.svg') 16 16, crosshair !important;
 }
 
 /* Liquid Glass Effect Enhancement */
@@ -38,7 +43,7 @@ body {
 
 /* Ocean Animation Styles */
 .ocean-waves {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -81,14 +86,164 @@ body {
 }
 
 .bubbles-container {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   pointer-events: none;
   z-index: 0;
   animation: bubbles-sway 10s linear infinite;
+}
+
+/* Fish Tank Styles */
+.fish-tank-container {
+  width: 90%;
+  max-width: 1400px;
+  height: 80vh;
+  max-height: 800px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.fish-tank-container-fullheight {
+  width: calc(100% - 2rem);
+  max-width: 1800px;
+  height: calc(100% - 0.25rem);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.fish-tank-frame {
+  flex: 1;
+  position: relative;
+  background: transparent;
+  border-left: 12px solid #1a1a2e;
+  border-right: 12px solid #1a1a2e;
+  border-bottom: 12px solid #1a1a2e;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.3),
+    0 20px 80px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Air gap at top of tank */
+.fish-tank-air-gap {
+  height: 30px;
+  background: transparent;
+  border-bottom: 2px solid rgba(100, 180, 255, 0.3);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.fish-tank-air-gap::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(100, 200, 255, 0.6) 20%,
+      rgba(150, 220, 255, 0.4) 50%,
+      rgba(100, 200, 255, 0.6) 80%,
+      transparent 100%);
+  animation: waterSurface 3s ease-in-out infinite;
+}
+
+@keyframes waterSurface {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scaleX(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scaleX(1.02);
+  }
+}
+
+/* Water container */
+.fish-tank-water {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg,
+      rgba(0, 40, 80, 0.95) 0%,
+      rgba(0, 60, 100, 0.95) 50%,
+      rgba(0, 50, 90, 0.95) 100%);
+}
+
+.fish-tank-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Glass reflection effects */
+.fish-tank-glass-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 80px;
+  height: 100%;
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 100%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.fish-tank-glass-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 80px;
+  height: 100%;
+  background: linear-gradient(-90deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.03) 50%,
+      transparent 100%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Tank Stand */
+.fish-tank-stand {
+  height: 60px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #2a2a3e 0%, #1a1a2e 100%);
+  border: 2px solid #0f0f1a;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.fish-tank-stand::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 4px;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(100, 150, 200, 0.4) 50%,
+      transparent 100%);
 }
 
 @keyframes bubbles-sway {
@@ -193,4 +348,22 @@ body {
   left: 50%;
   animation-duration: 10s;
   opacity: 0.2;
+}
+
+/* Fish Breathing Bubbles Animation */
+@keyframes bubbleRise {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: translateY(-40vh) translateX(10px);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: translateY(-80vh) translateX(-5px);
+    opacity: 0;
+  }
 }

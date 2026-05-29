@@ -7,28 +7,88 @@ export default function Aquarium2D() {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>(0);
   const fishStateRef = useRef<Map<string, any>>(new Map());
+  const bubblesRef = useRef<Map<string, number>>(new Map()); // Track last bubble time per fish
+  const dragStateRef = useRef<{
+    isDragging: boolean;
+    fishId: string | null;
+    offsetX: number;
+    offsetY: number;
+  }>({ isDragging: false, fishId: null, offsetX: 0, offsetY: 0 });
 
-  const { fish, isRunning, setAquariumSize, updateFish } = useGameStore();
+  const {
+    fish,
+    isRunning,
+    fishingNetMode,
+    moveMode,
+    setAquariumSize,
+    updateFish,
+    removeFish,
+  } = useGameStore();
 
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        setAquariumSize(width, height);
+        const rect = containerRef.current.getBoundingClientRect();
+        setAquariumSize(rect.width, rect.height);
       }
     };
 
+    // Initial size update with a slight delay to ensure layout is complete
+    const timeoutId = setTimeout(updateSize, 100);
     updateSize();
+
     window.addEventListener("resize", updateSize);
 
+    // Use ResizeObserver to detect container size changes
+    const resizeObserver = new ResizeObserver(updateSize);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener("resize", updateSize);
+      resizeObserver.disconnect();
     };
   }, [setAquariumSize]);
 
   useEffect(() => {
     if (!isRunning) return;
+
+    // Function to create a bubble
+    const createBubble = (
+      fishId: string,
+      x: number,
+      y: number,
+      fishSize: number,
+    ) => {
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.style.cssText = `
+        position: absolute;
+        left: ${x}px;
+        top: ${y}px;
+        width: ${3 + Math.random() * 4}px;
+        height: ${3 + Math.random() * 4}px;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(173, 216, 230, 0.4));
+        border-radius: 50%;
+        pointer-events: none;
+        animation: bubbleRise ${3 + Math.random() * 2}s linear forwards;
+        opacity: 0.7;
+        box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.8), 0 0 3px rgba(255, 255, 255, 0.3);
+      `;
+
+      if (containerRef.current) {
+        containerRef.current.appendChild(bubble);
+
+        // Remove bubble after animation
+        setTimeout(() => {
+          if (bubble.parentNode) {
+            bubble.parentNode.removeChild(bubble);
+          }
+        }, 5000);
+      }
+    };
 
     const animate = () => {
       const aquariumWidth = useGameStore.getState().aquariumWidth;
@@ -208,6 +268,32 @@ export default function Aquarium2D() {
         if (element) {
           element.style.transform = `translate(${newX}px, ${newY}px) scaleX(${scaleX}) scaleY(${scaleY}) rotate(${rotationAngle}rad)`;
         }
+
+        // Create bubbles periodically (breathing effect)
+        const now = Date.now();
+        const lastBubbleTime = bubblesRef.current.get(fishData.id) || 0;
+        const bubbleInterval = 4000 + Math.random() * 3000; // Every 4-7 seconds
+
+        if (now - lastBubbleTime > bubbleInterval) {
+          bubblesRef.current.set(fishData.id, now);
+
+          // Spawn 1-2 bubbles from fish mouth area
+          const numBubbles = 1 + Math.floor(Math.random() * 2);
+          for (let i = 0; i < numBubbles; i++) {
+            setTimeout(() => {
+              // Bubble spawns from front of fish (mouth area)
+              const bubbleOffsetX =
+                scaleX > 0 ? fishData.size * 0.4 : -fishData.size * 0.4;
+              const bubbleOffsetY = (Math.random() - 0.5) * fishData.size * 0.2;
+              createBubble(
+                fishData.id,
+                newX + bubbleOffsetX,
+                newY + bubbleOffsetY,
+                fishData.size,
+              );
+            }, i * 150); // Stagger bubble creation slightly
+          }
+        }
       });
 
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -222,11 +308,111 @@ export default function Aquarium2D() {
     };
   }, [fish, isRunning]);
 
+  // Handle drag functionality
+  useEffect(() => {
+    if (!moveMode) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragStateRef.current.isDragging || !dragStateRef.current.fishId)
+        return;
+
+      const newX = e.clientX - dragStateRef.current.offsetX;
+      const newY = e.clientY - dragStateRef.current.offsetY;
+
+      // Update fish state in ref for smooth dragging
+      const state = fishStateRef.current.get(dragStateRef.current.fishId);
+      if (state) {
+        state.x = newX;
+        state.y = newY;
+
+        // Update DOM immediately for smooth dragging
+        const element = document.getElementById(
+          `fish-${dragStateRef.current.fishId}`,
+        );
+        if (element) {
+          const fishData = fish.find(
+            (f) => f.id === dragStateRef.current.fishId,
+          );
+          if (fishData) {
+            let scaleX = 1;
+            let rotationAngle = 0;
+
+            if (fishData.swimDirection !== "vertical") {
+              const normalizedDir =
+                ((state.direction % (Math.PI * 2)) + Math.PI * 2) %
+                (Math.PI * 2);
+              const isFacingLeft =
+                normalizedDir > Math.PI / 2 &&
+                normalizedDir < (3 * Math.PI) / 2;
+              scaleX = isFacingLeft ? -1 : 1;
+              rotationAngle = isFacingLeft
+                ? Math.PI - normalizedDir
+                : normalizedDir;
+            }
+
+            element.style.transform = `translate(${newX}px, ${newY}px) scaleX(${scaleX}) rotate(${rotationAngle}rad)`;
+          }
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (dragStateRef.current.isDragging && dragStateRef.current.fishId) {
+        // Update the store with the final position
+        const state = fishStateRef.current.get(dragStateRef.current.fishId);
+        if (state) {
+          updateFish(dragStateRef.current.fishId, {
+            x: state.x,
+            y: state.y,
+          });
+        }
+      }
+      dragStateRef.current.isDragging = false;
+      dragStateRef.current.fishId = null;
+      document.body.style.cursor = "";
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [moveMode, fish, updateFish]);
+
+  const handleFishMouseDown = (
+    fishId: string,
+    e: React.MouseEvent<HTMLDivElement>,
+  ) => {
+    if (!moveMode) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const fishElement = document.getElementById(`fish-${fishId}`);
+    if (!fishElement) return;
+
+    const state = fishStateRef.current.get(fishId);
+    if (!state) return;
+
+    dragStateRef.current = {
+      isDragging: true,
+      fishId: fishId,
+      offsetX: e.clientX - state.x,
+      offsetY: e.clientY - state.y,
+    };
+
+    document.body.style.cursor = "grabbing";
+  };
+
   return (
     <div
       ref={containerRef}
-      className="w-full h-full relative overflow-hidden"
-      style={{ background: "transparent" }}
+      className={`w-full h-full relative overflow-hidden ${fishingNetMode ? "fishing-net-cursor" : ""} ${moveMode ? "cursor-grab" : ""}`}
+      style={{
+        background: "transparent",
+      }}
     >
       {fish.map((fishData) => {
         // Calculate initial orientation based on swim direction
@@ -254,14 +440,21 @@ export default function Aquarium2D() {
           <div
             key={fishData.id}
             id={`fish-${fishData.id}`}
-            className="absolute"
+            className={`absolute ${fishingNetMode ? "hover:opacity-70" : ""} ${moveMode ? "cursor-grab hover:cursor-grab active:cursor-grabbing" : ""}`}
             style={{
               width: `${fishData.size}px`,
               height: `${fishData.size}px`,
               transform: `translate(${fishData.x}px, ${fishData.y}px) scaleX(${scaleX}) scaleY(${scaleY}) rotate(${rotationAngle}rad)`,
               transformOrigin: "center center",
-              transition: "none",
+              transition: fishingNetMode || moveMode ? "opacity 0.2s" : "none",
+              pointerEvents: fishingNetMode || moveMode ? "auto" : "none",
             }}
+            onClick={() => {
+              if (fishingNetMode) {
+                removeFish(fishData.id);
+              }
+            }}
+            onMouseDown={(e) => handleFishMouseDown(fishData.id, e)}
           >
             <img
               src={fishData.svgPath}
