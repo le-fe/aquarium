@@ -18,22 +18,46 @@ export interface FishModel {
   sizeRatio: number; // 0.5 = small, 1.0 = medium, 1.5 = large
 }
 
+export interface Decorator {
+  id: string;
+  imagePath: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface DecoratorModel {
+  id: string;
+  name: string;
+  path: string;
+  defaultWidth: number;
+}
+
 export interface GameState {
   fish: Fish[];
+  decorators: Decorator[];
   isRunning: boolean;
   fishingNetMode: boolean;
   moveMode: boolean;
   aquariumWidth: number;
   aquariumHeight: number;
   wallpaper: string;
+  selectedItem: { type: "fish" | "decorator"; id: string } | null;
   addFish: (svgPath: string) => void;
   removeFish: (id: string) => void;
   updateFish: (id: string, updates: Partial<Fish>) => void;
+  addDecorator: (imagePath: string) => void;
+  removeDecorator: (id: string) => void;
+  updateDecorator: (id: string, updates: Partial<Decorator>) => void;
   toggleRunning: () => void;
   toggleFishingNet: () => void;
   toggleMoveMode: () => void;
   setAquariumSize: (width: number, height: number) => void;
   setWallpaper: (wallpaper: string) => void;
+  setSelectedItem: (
+    item: { type: "fish" | "decorator"; id: string } | null,
+  ) => void;
 }
 
 export const WALLPAPERS = [
@@ -42,6 +66,45 @@ export const WALLPAPERS = [
   "/wallpaper/265125.jpg",
   "/wallpaper/9300739.jpg",
   // Add more wallpapers here as they are added to the public/wallpaper folder
+];
+
+export const DECORATORS: DecoratorModel[] = [
+  {
+    id: "rocky-garden",
+    name: "Rocky Garden",
+    path: "/decorators/rocky-garden.png",
+    defaultWidth: 200,
+  },
+  {
+    id: "green-moss-surrounded-by-lush-foliage",
+    name: "Green Moss Surrounded by Lush Foliage",
+    path: "/decorators/green-moss-surrounded-by-lush-foliage.png",
+    defaultWidth: 200,
+  },
+  {
+    id: "rocky-heap",
+    name: "Rocky Heap",
+    path: "/decorators/rocky-heap.png",
+    defaultWidth: 100,
+  },
+  {
+    id: "large-rocks-covered-in-vibrant-green-moss-surrounded",
+    name: "Large Rocks Covered in Vibrant Green Moss Surrounded",
+    path: "/decorators/large-rocks-covered-in-vibrant-green-moss-surrounded.png",
+    defaultWidth: 250,
+  },
+  {
+    id: "buddha-statue-representing-peace-and-wisdom",
+    name: "Buddha Statue Representing Peace and Wisdom",
+    path: "/decorators/buddha-statue-representing-peace-and-wisdom.png",
+    defaultWidth: 150,
+  },
+  {
+    id: "buddha-statue-representing-peace-and-wisdom-isolated_57447268",
+    name: "Buddha Statue Representing Peace and Wisdom Isolated",
+    path: "/decorators/buddha-statue-representing-peace-and-wisdom-isolated_57447268.png",
+    defaultWidth: 150,
+  },
 ];
 
 export const FISH_MODELS: FishModel[] = [
@@ -164,6 +227,14 @@ export const FISH_MODELS: FishModel[] = [
     swimDirection: "normal",
     maxSpeed: 0.6,
     sizeRatio: 6.0,
+  },
+  {
+    id: "red-fish",
+    name: "Red Fish",
+    path: "/fish/red-fish.svg",
+    swimDirection: "normal",
+    maxSpeed: 1.5,
+    sizeRatio: 0.9,
   },
   {
     id: "horse-fish",

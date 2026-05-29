@@ -23,6 +23,7 @@ export default function Aquarium2D() {
     setAquariumSize,
     updateFish,
     removeFish,
+    setSelectedItem,
   } = useGameStore();
 
   useEffect(() => {
@@ -447,11 +448,19 @@ export default function Aquarium2D() {
               transform: `translate(${fishData.x}px, ${fishData.y}px) scaleX(${scaleX}) scaleY(${scaleY}) rotate(${rotationAngle}rad)`,
               transformOrigin: "center center",
               transition: fishingNetMode || moveMode ? "opacity 0.2s" : "none",
-              pointerEvents: fishingNetMode || moveMode ? "auto" : "none",
+              pointerEvents: fishingNetMode || moveMode ? "auto" : "auto",
+              cursor: fishingNetMode
+                ? "pointer"
+                : moveMode
+                  ? "grab"
+                  : "pointer",
             }}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               if (fishingNetMode) {
                 removeFish(fishData.id);
+              } else if (!moveMode) {
+                setSelectedItem({ type: "fish", id: fishData.id });
               }
             }}
             onMouseDown={(e) => handleFishMouseDown(fishData.id, e)}

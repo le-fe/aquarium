@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Fish, GameState, FISH_MODELS } from "@/types/game";
+import { Fish, GameState, FISH_MODELS, DECORATORS } from "@/types/game";
 
 const createRandomFish = (
   width: number,
@@ -46,12 +46,14 @@ export const useGameStore = create<GameState>()(
   persist(
     (set) => ({
       fish: [], // Start with empty aquarium
+      decorators: [], // Start with no decorators
       isRunning: true,
       fishingNetMode: false,
       moveMode: false,
       aquariumWidth: 800,
       aquariumHeight: 600,
       wallpaper: "/wallpaper/8297855.jpg",
+      selectedItem: null,
 
       addFish: (svgPath: string) =>
         set((state) => {
@@ -79,6 +81,8 @@ export const useGameStore = create<GameState>()(
       removeFish: (id: string) =>
         set((state) => ({
           fish: state.fish.filter((f) => f.id !== id),
+          selectedItem:
+            state.selectedItem?.id === id ? null : state.selectedItem,
         })),
 
       updateFish: (id: string, updates: Partial<Fish>) =>
@@ -113,11 +117,84 @@ export const useGameStore = create<GameState>()(
         set({
           wallpaper,
         }),
+
+      addDecorator: (imagePath: string) =>
+        set((state) => {
+          // Find decorator model
+          const model = DECORATORS.find((d) => d.path === imagePath);
+          const width = model?.defaultWidth ?? 200;
+
+          // Load image to get natural dimensions and calculate height
+          const img = new Image();
+          img.src = imagePath;
+
+          const decoratorId = Math.random().toString(36).substr(2, 9);
+
+          // Use temporary height until image loads
+          const tempHeight = width; // Square as placeholder
+          const x = Math.random() * (state.aquariumWidth - width);
+          const y = state.aquariumHeight - tempHeight - 40; // 40px above ground
+
+          // Add decorator with temporary dimensions
+          const newDecorators = [
+            ...state.decorators,
+            {
+              id: decoratorId,
+              imagePath,
+              x,
+              y,
+              width,
+              height: tempHeight,
+            },
+          ];
+
+          // Update height when image loads
+          img.onload = () => {
+            const aspectRatio = img.naturalHeight / img.naturalWidth;
+            const calculatedHeight = width * aspectRatio;
+            const currentState = useGameStore.getState();
+            const decorator = currentState.decorators.find(
+              (d) => d.id === decoratorId,
+            );
+            if (decorator) {
+              currentState.updateDecorator(decoratorId, {
+                height: calculatedHeight,
+                y: currentState.aquariumHeight - calculatedHeight - 40,
+              });
+            }
+          };
+
+          return {
+            decorators: newDecorators,
+          };
+        }),
+
+      removeDecorator: (id: string) =>
+        set((state) => ({
+          decorators: state.decorators.filter((d) => d.id !== id),
+          selectedItem:
+            state.selectedItem?.id === id ? null : state.selectedItem,
+        })),
+
+      updateDecorator: (id: string, updates: Partial<Decorator>) =>
+        set((state) => ({
+          decorators: state.decorators.map((d) =>
+            d.id === id ? { ...d, ...updates } : d,
+          ),
+        })),
+
+      setSelectedItem: (
+        item: { type: "fish" | "decorator"; id: string } | null,
+      ) =>
+        set({
+          selectedItem: item,
+        }),
     }),
     {
       name: "aquarium-storage", // localStorage key
       partialize: (state) => ({
         fish: state.fish,
+        decorators: state.decorators,
         isRunning: state.isRunning,
       }),
     },

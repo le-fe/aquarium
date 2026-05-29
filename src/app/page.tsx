@@ -3,10 +3,107 @@
 import Aquarium2D from "@/components/Aquarium2D";
 import GameControls from "@/components/GameControls";
 import OceanBackground from "@/components/OceanBackground";
+import ItemSidebar from "@/components/ItemSidebar";
 import { useGameStore } from "@/stores/gameStore";
+import { useEffect, useRef } from "react";
 
 export default function Home() {
-  const { wallpaper } = useGameStore();
+  const { wallpaper, decorators, setSelectedItem, updateDecorator, moveMode } =
+    useGameStore();
+
+  const dragStateRef = useRef<{
+    isDragging: boolean;
+    decoratorId: string | null;
+    offsetX: number;
+    offsetY: number;
+  }>({ isDragging: false, decoratorId: null, offsetX: 0, offsetY: 0 });
+
+  // Handle decorator drag functionality
+  useEffect(() => {
+    if (!moveMode) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!dragStateRef.current.isDragging || !dragStateRef.current.decoratorId)
+        return;
+
+      const element = document.getElementById(
+        `decorator-${dragStateRef.current.decoratorId}`,
+      );
+      if (element && element.parentElement) {
+        const containerRect = element.parentElement.getBoundingClientRect();
+
+        const newX =
+          e.clientX - containerRect.left - dragStateRef.current.offsetX;
+        const newY =
+          e.clientY - containerRect.top - dragStateRef.current.offsetY;
+
+        // Update DOM immediately for smooth dragging
+        element.style.left = `${newX}px`;
+        element.style.top = `${newY}px`;
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (dragStateRef.current.isDragging && dragStateRef.current.decoratorId) {
+        // Update the store with the final position
+        const element = document.getElementById(
+          `decorator-${dragStateRef.current.decoratorId}`,
+        );
+
+        if (element && element.parentElement) {
+          const rect = element.getBoundingClientRect();
+          const container = element.parentElement.getBoundingClientRect();
+
+          const finalX = rect.left - container.left;
+          const finalY = rect.top - container.top;
+
+          updateDecorator(dragStateRef.current.decoratorId, {
+            x: finalX,
+            y: finalY,
+          });
+        }
+      }
+      dragStateRef.current.isDragging = false;
+      dragStateRef.current.decoratorId = null;
+      document.body.style.cursor = "";
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [moveMode, updateDecorator]);
+
+  const handleDecoratorMouseDown = (
+    decoratorId: string,
+    e: React.MouseEvent<HTMLImageElement>,
+  ) => {
+    if (!moveMode) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const decoratorElement = document.getElementById(
+      `decorator-${decoratorId}`,
+    );
+    if (!decoratorElement || !decoratorElement.parentElement) return;
+
+    const rect = decoratorElement.getBoundingClientRect();
+    const containerRect =
+      decoratorElement.parentElement.getBoundingClientRect();
+
+    dragStateRef.current = {
+      isDragging: true,
+      decoratorId: decoratorId,
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+    };
+
+    document.body.style.cursor = "grabbing";
+  };
 
   return (
     <div
@@ -48,6 +145,41 @@ export default function Home() {
               {/* Aquarium content */}
               <div className="fish-tank-inner">
                 <OceanBackground />
+
+                {/* Sand/Gravel at bottom */}
+                <div className="tank-ground"></div>
+
+                {/* Decorators */}
+                {decorators.map((decorator) => (
+                  <img
+                    key={decorator.id}
+                    id={`decorator-${decorator.id}`}
+                    src={decorator.imagePath}
+                    alt="decorator"
+                    className="absolute cursor-pointer hover:opacity-80 transition-opacity"
+                    style={{
+                      left: `${decorator.x}px`,
+                      top: `${decorator.y}px`,
+                      width: `${decorator.width}px`,
+                      height: `${decorator.height}px`,
+                      zIndex: 6,
+                      cursor: moveMode ? "grab" : "pointer",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!moveMode) {
+                        setSelectedItem({
+                          type: "decorator",
+                          id: decorator.id,
+                        });
+                      }
+                    }}
+                    onMouseDown={(e) =>
+                      handleDecoratorMouseDown(decorator.id, e)
+                    }
+                  />
+                ))}
+
                 <Aquarium2D />
               </div>
             </div>
@@ -57,6 +189,9 @@ export default function Home() {
           <div className="fish-tank-stand"></div>
         </div>
       </div>
+
+      {/* Item Sidebar */}
+      <ItemSidebar />
     </div>
   );
 }

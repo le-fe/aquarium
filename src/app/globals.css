@@ -246,6 +246,64 @@ body {
       transparent 100%);
 }
 
+/* Tank Decorations - Sand, Plants, Rocks */
+.tank-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background-image: url('/base/sand.png');
+  background-size: auto 100%;
+  background-position: left bottom;
+  background-repeat: repeat-x;
+  z-index: 5;
+}
+
+@keyframes plantSway {
+
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+/* Simple Rocks/Pebbles */
+.tank-rock {
+  position: absolute;
+  bottom: 40px;
+  background: linear-gradient(135deg,
+      rgba(100, 90, 80, 0.9) 0%,
+      rgba(70, 65, 60, 0.95) 100%);
+  border-radius: 50%;
+  z-index: 6;
+}
+
+.tank-rock-1 {
+  left: 25%;
+  width: 40px;
+  height: 35px;
+  border-radius: 60% 40% 50% 50%;
+}
+
+.tank-rock-2 {
+  left: 50%;
+  width: 50px;
+  height: 40px;
+  border-radius: 50% 50% 45% 55%;
+}
+
+.tank-rock-3 {
+  left: 65%;
+  width: 35px;
+  height: 30px;
+  border-radius: 55% 45% 50% 50%;
+}
+
 @keyframes bubbles-sway {
 
   0%,

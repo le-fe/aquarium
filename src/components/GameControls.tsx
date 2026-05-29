@@ -1,7 +1,7 @@
 "use client";
 
 import { useGameStore } from "@/stores/gameStore";
-import { FISH_MODELS, WALLPAPERS } from "@/types/game";
+import { FISH_MODELS, WALLPAPERS, DECORATORS } from "@/types/game";
 import { useState, useEffect, useRef } from "react";
 import {
   Fish,
@@ -12,16 +12,21 @@ import {
   Pause,
   Hand,
   Image,
+  Sparkles,
 } from "lucide-react";
 
 export default function GameControls() {
   const {
     fish,
+    decorators,
     isRunning,
     fishingNetMode,
     moveMode,
     wallpaper,
     addFish,
+    removeFish,
+    addDecorator,
+    removeDecorator,
     toggleRunning,
     toggleFishingNet,
     toggleMoveMode,
@@ -29,9 +34,11 @@ export default function GameControls() {
   } = useGameStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isWallpaperDropdownOpen, setIsWallpaperDropdownOpen] = useState(false);
+  const [isDecoratorDropdownOpen, setIsDecoratorDropdownOpen] = useState(false);
   const [isFishListOpen, setIsFishListOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const wallpaperDropdownRef = useRef<HTMLDivElement>(null);
+  const decoratorDropdownRef = useRef<HTMLDivElement>(null);
   const fishListRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -50,6 +57,12 @@ export default function GameControls() {
         setIsWallpaperDropdownOpen(false);
       }
       if (
+        decoratorDropdownRef.current &&
+        !decoratorDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDecoratorDropdownOpen(false);
+      }
+      if (
         fishListRef.current &&
         !fishListRef.current.contains(event.target as Node)
       ) {
@@ -57,14 +70,24 @@ export default function GameControls() {
       }
     };
 
-    if (isDropdownOpen || isWallpaperDropdownOpen || isFishListOpen) {
+    if (
+      isDropdownOpen ||
+      isWallpaperDropdownOpen ||
+      isDecoratorDropdownOpen ||
+      isFishListOpen
+    ) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isDropdownOpen, isWallpaperDropdownOpen, isFishListOpen]);
+  }, [
+    isDropdownOpen,
+    isWallpaperDropdownOpen,
+    isDecoratorDropdownOpen,
+    isFishListOpen,
+  ]);
 
   // Cancel Move or Fishing mode when pressing Esc
   useEffect(() => {
@@ -286,6 +309,108 @@ export default function GameControls() {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Decorator Button */}
+      <div className="relative" ref={decoratorDropdownRef}>
+        <button
+          onClick={() => setIsDecoratorDropdownOpen(!isDecoratorDropdownOpen)}
+          className="group relative px-2.5 py-1.5 font-semibold rounded-lg transition-all shadow-lg hover:scale-105 transform border border-white/30 flex items-center gap-2"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(251, 146, 60, 0.6) 0%, rgba(249, 115, 22, 0.6) 100%)",
+            color: "white",
+          }}
+        >
+          <Sparkles className="w-4 h-4" />
+          {/* Tooltip */}
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            Decorators
+          </div>
+        </button>
+
+        {/* Decorator Dropdown Panel */}
+        {isDecoratorDropdownOpen && (
+          <div
+            className="absolute top-full left-0 mt-2 p-4 rounded-xl shadow-2xl border border-white/30 z-50 backdrop-blur-xl"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)",
+              minWidth: "400px",
+              maxHeight: "500px",
+              overflowY: "auto",
+            }}
+          >
+            <div className="mb-4">
+              <h3 className="text-gray-800 font-semibold text-sm mb-3">
+                Add Decorator
+              </h3>
+              <div className="grid grid-cols-3 gap-2">
+                {DECORATORS.map((decorator) => (
+                  <button
+                    key={decorator.id}
+                    onClick={() => {
+                      addDecorator(decorator.path);
+                    }}
+                    className="group relative aspect-square p-2 rounded-lg overflow-hidden transition-all hover:scale-105 transform border-2 border-gray-300 hover:border-blue-400 bg-white"
+                  >
+                    <img
+                      src={decorator.path}
+                      alt={decorator.name}
+                      className="w-full h-full object-contain"
+                    />
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                      {decorator.name}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Current Decorators List */}
+            {decorators.length > 0 && (
+              <div className="border-t border-gray-200 pt-4">
+                <h3 className="text-gray-800 font-semibold text-sm mb-3">
+                  Current Decorators ({decorators.length})
+                </h3>
+                <div className="space-y-2">
+                  {decorators.map((dec) => {
+                    const model = DECORATORS.find(
+                      (d) => d.path === dec.imagePath,
+                    );
+                    return (
+                      <div
+                        key={dec.id}
+                        className="flex items-center gap-3 p-2 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
+                      >
+                        <img
+                          src={dec.imagePath}
+                          alt="decorator"
+                          className="w-12 h-12 object-contain"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-800 truncate">
+                            {model?.name || "Unknown Decorator"}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {dec.width}x{dec.height}px
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => removeDecorator(dec.id)}
+                          className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
