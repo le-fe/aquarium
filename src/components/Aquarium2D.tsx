@@ -18,8 +18,8 @@ export default function Aquarium2D() {
   const {
     fish,
     isRunning,
-    fishingNetMode,
     moveMode,
+    lightsMode,
     setAquariumSize,
     updateFish,
     removeFish,
@@ -94,6 +94,14 @@ export default function Aquarium2D() {
     const animate = () => {
       const aquariumWidth = useGameStore.getState().aquariumWidth;
       const aquariumHeight = useGameStore.getState().aquariumHeight;
+      const currentLightsMode = useGameStore.getState().lightsMode;
+      // Speed multiplier: bright = 1.0, medium = 0.75, off = 0.5
+      const speedMultiplier =
+        currentLightsMode === "bright"
+          ? 1
+          : currentLightsMode === "medium"
+            ? 0.75
+            : 0.5;
 
       fish.forEach((fishData) => {
         let state = fishStateRef.current.get(fishData.id);
@@ -124,7 +132,7 @@ export default function Aquarium2D() {
           // Vertical swimmers: smooth up/down movement with gentle swaying
           velocityY = state.verticalDirection * state.speed;
           // Add gentle horizontal swaying using sine wave
-          state.swayOffset += 0.02;
+          state.swayOffset += 0.02 * speedMultiplier;
           velocityX = Math.sin(state.swayOffset) * state.speed * 0.3;
         } else if (state.swimDirection === "horizontal") {
           // Primarily horizontal movement (left and right)
@@ -136,6 +144,10 @@ export default function Aquarium2D() {
           velocityY = Math.sin(state.direction) * state.speed * 0.3; // Reduced vertical component
         }
 
+        // Apply speed reduction when lights are off
+        velocityX *= speedMultiplier;
+        velocityY *= speedMultiplier;
+
         // Update position
         let newX = state.x + velocityX;
         let newY = state.y + velocityY;
@@ -143,6 +155,7 @@ export default function Aquarium2D() {
 
         // Bounce off walls
         const margin = fishData.size / 2;
+        const surfaceHeight = 50; // Keep fish below water surface
         if (newX < margin || newX > aquariumWidth - margin) {
           if (state.swimDirection === "vertical") {
             // For vertical swimmers, don't change vertical direction, just contain X
@@ -153,19 +166,28 @@ export default function Aquarium2D() {
             newX = Math.max(margin, Math.min(aquariumWidth - margin, newX));
           }
         }
-        if (newY < margin || newY > aquariumHeight - margin) {
+        if (newY < margin + surfaceHeight || newY > aquariumHeight - margin) {
           if (state.swimDirection === "vertical") {
             // For vertical swimmers, reverse vertical direction
             state.verticalDirection *= -1;
-            newY = Math.max(margin, Math.min(aquariumHeight - margin, newY));
+            newY = Math.max(
+              margin + surfaceHeight,
+              Math.min(aquariumHeight - margin, newY),
+            );
           } else if (state.swimDirection === "horizontal") {
             // For horizontal swimmers, just reverse the small vertical drift
             newDirection = -newDirection;
-            newY = Math.max(margin, Math.min(aquariumHeight - margin, newY));
+            newY = Math.max(
+              margin + surfaceHeight,
+              Math.min(aquariumHeight - margin, newY),
+            );
           } else {
             // For normal swimmers, bounce normally
             newDirection = -newDirection + (Math.random() - 0.5) * 0.3;
-            newY = Math.max(margin, Math.min(aquariumHeight - margin, newY));
+            newY = Math.max(
+              margin + surfaceHeight,
+              Math.min(aquariumHeight - margin, newY),
+            );
           }
         }
 
@@ -410,7 +432,7 @@ export default function Aquarium2D() {
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full relative overflow-hidden ${fishingNetMode ? "fishing-net-cursor" : ""} ${moveMode ? "cursor-grab" : ""}`}
+      className={`w-full h-full relative overflow-hidden ${moveMode ? "cursor-grab" : ""}`}
       style={{
         background: "transparent",
       }}
@@ -441,25 +463,18 @@ export default function Aquarium2D() {
           <div
             key={fishData.id}
             id={`fish-${fishData.id}`}
-            className={`absolute ${fishingNetMode ? "hover:opacity-70" : ""} ${moveMode ? "cursor-grab hover:cursor-grab active:cursor-grabbing" : ""}`}
+            className={`absolute ${moveMode ? "cursor-grab hover:cursor-grab active:cursor-grabbing" : ""}`}
             style={{
               width: `${fishData.size}px`,
-              height: `${fishData.size}px`,
               transform: `translate(${fishData.x}px, ${fishData.y}px) scaleX(${scaleX}) scaleY(${scaleY}) rotate(${rotationAngle}rad)`,
               transformOrigin: "center center",
-              transition: fishingNetMode || moveMode ? "opacity 0.2s" : "none",
-              pointerEvents: fishingNetMode || moveMode ? "auto" : "auto",
-              cursor: fishingNetMode
-                ? "pointer"
-                : moveMode
-                  ? "grab"
-                  : "pointer",
+              transition: moveMode ? "opacity 0.2s" : "none",
+              pointerEvents: "auto",
+              cursor: moveMode ? "grab" : "pointer",
             }}
             onClick={(e) => {
               e.stopPropagation();
-              if (fishingNetMode) {
-                removeFish(fishData.id);
-              } else if (!moveMode) {
+              if (!moveMode) {
                 setSelectedItem({ type: "fish", id: fishData.id });
               }
             }}
@@ -468,8 +483,13 @@ export default function Aquarium2D() {
             <img
               src={fishData.svgPath}
               alt="fish"
-              className="w-full h-full"
-              style={{ pointerEvents: "none" }}
+              style={{
+                pointerEvents: "none",
+                display: "block",
+                width: "100%",
+                height: "auto",
+                objectFit: "contain",
+              }}
             />
           </div>
         );

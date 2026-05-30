@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { Fish, GameState, FISH_MODELS, DECORATORS } from "@/types/game";
+import {
+  Fish,
+  Decorator,
+  GameState,
+  FISH_MODELS,
+  DECORATORS,
+} from "@/types/game";
 
 const createRandomFish = (
   width: number,
@@ -26,14 +32,20 @@ const createRandomFish = (
     initialDirection = Math.random() * Math.PI * 2;
   }
 
-  // Base size 60px, scaled by sizeRatio with ±20% variation
+  // Base size 60px, scaled by sizeRatio as maximum with 50-100% variation
   const baseSize = 60;
-  const size = baseSize * sizeRatio * (0.8 + Math.random() * 0.4);
+  const size = baseSize * sizeRatio * (0.5 + Math.random() * 0.5);
+
+  // Keep fish below water surface (50px)
+  const surfaceHeight = 50;
+  const minY = surfaceHeight + size / 2;
+  const maxY = height - size / 2;
+  const y = minY + Math.random() * (maxY - minY);
 
   return {
     id: Math.random().toString(36).substr(2, 9),
     x: Math.random() * width,
-    y: Math.random() * height,
+    y: y,
     speed: maxSpeed * (0.5 + Math.random() * 0.5), // Random speed: 50% to 100% of maxSpeed
     size: size,
     direction: initialDirection,
@@ -48,8 +60,8 @@ export const useGameStore = create<GameState>()(
       fish: [], // Start with empty aquarium
       decorators: [], // Start with no decorators
       isRunning: true,
-      fishingNetMode: false,
       moveMode: false,
+      lightsMode: "bright",
       aquariumWidth: 800,
       aquariumHeight: 600,
       wallpaper: "/wallpaper/8297855.jpg",
@@ -95,16 +107,19 @@ export const useGameStore = create<GameState>()(
           isRunning: !state.isRunning,
         })),
 
-      toggleFishingNet: () =>
-        set((state) => ({
-          fishingNetMode: !state.fishingNetMode,
-          moveMode: false, // Disable move mode when fishing net is enabled
-        })),
-
       toggleMoveMode: () =>
         set((state) => ({
           moveMode: !state.moveMode,
-          fishingNetMode: false, // Disable fishing net when move mode is enabled
+        })),
+
+      cycleLightsMode: () =>
+        set((state) => ({
+          lightsMode:
+            state.lightsMode === "bright"
+              ? "medium"
+              : state.lightsMode === "medium"
+                ? "off"
+                : "bright",
         })),
 
       setAquariumSize: (width: number, height: number) =>

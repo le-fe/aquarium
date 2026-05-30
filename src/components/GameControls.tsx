@@ -13,6 +13,7 @@ import {
   Hand,
   Image,
   Sparkles,
+  Lightbulb,
 } from "lucide-react";
 
 export default function GameControls() {
@@ -20,16 +21,16 @@ export default function GameControls() {
     fish,
     decorators,
     isRunning,
-    fishingNetMode,
     moveMode,
+    lightsMode,
     wallpaper,
     addFish,
     removeFish,
     addDecorator,
     removeDecorator,
     toggleRunning,
-    toggleFishingNet,
     toggleMoveMode,
+    cycleLightsMode,
     setWallpaper,
   } = useGameStore();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -89,13 +90,11 @@ export default function GameControls() {
     isFishListOpen,
   ]);
 
-  // Cancel Move or Fishing mode when pressing Esc
+  // Cancel Move mode when pressing Esc
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        if (fishingNetMode) {
-          toggleFishingNet();
-        } else if (moveMode) {
+        if (moveMode) {
           toggleMoveMode();
         }
       }
@@ -106,7 +105,7 @@ export default function GameControls() {
     return () => {
       document.removeEventListener("keydown", handleEscKey);
     };
-  }, [fishingNetMode, moveMode, toggleFishingNet, toggleMoveMode]);
+  }, [moveMode, toggleMoveMode]);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -176,7 +175,7 @@ export default function GameControls() {
                     {model.sizeRatio.toFixed(1)}x
                   </div>
                   {/* Tooltip */}
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                     {model.name} (Size: {model.sizeRatio.toFixed(1)}x)
                   </div>
                 </button>
@@ -203,30 +202,8 @@ export default function GameControls() {
           <Play className="w-4 h-4" />
         )}
         {/* Tooltip */}
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
           {isRunning ? "Pause" : "Play"}
-        </div>
-      </button>
-
-      <button
-        onClick={toggleFishingNet}
-        className="group relative px-2.5 py-1.5 font-semibold rounded-lg transition-all shadow-lg hover:scale-105 transform border border-white/30 flex items-center gap-2"
-        style={{
-          background: fishingNetMode
-            ? "linear-gradient(135deg, rgba(139, 92, 246, 0.6) 0%, rgba(109, 40, 217, 0.6) 100%)"
-            : "linear-gradient(135deg, rgba(107, 114, 128, 0.6) 0%, rgba(75, 85, 99, 0.6) 100%)",
-          color: "white",
-        }}
-      >
-        <img
-          src="/icons/fishing-net.svg"
-          alt="fishing net"
-          className="w-4 h-4"
-          style={{ filter: "brightness(0) invert(1)" }}
-        />
-        {/* Tooltip */}
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-          {fishingNetMode ? "Fishing..." : "Fishing Net"}
         </div>
       </button>
 
@@ -242,8 +219,32 @@ export default function GameControls() {
       >
         <Hand className="w-4 h-4" />
         {/* Tooltip */}
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
           {moveMode ? "Moving..." : "Move"}
+        </div>
+      </button>
+
+      <button
+        onClick={cycleLightsMode}
+        className="group relative px-2.5 py-1.5 font-semibold rounded-lg transition-all shadow-lg hover:scale-105 transform border border-white/30 flex items-center gap-2"
+        style={{
+          background:
+            lightsMode === "bright"
+              ? "linear-gradient(135deg, rgba(250, 204, 21, 0.6) 0%, rgba(234, 179, 8, 0.6) 100%)"
+              : lightsMode === "medium"
+                ? "linear-gradient(135deg, rgba(245, 158, 11, 0.6) 0%, rgba(217, 119, 6, 0.6) 100%)"
+                : "linear-gradient(135deg, rgba(107, 114, 128, 0.6) 0%, rgba(75, 85, 99, 0.6) 100%)",
+          color: "white",
+        }}
+      >
+        <Lightbulb className="w-4 h-4" />
+        {/* Tooltip */}
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+          {lightsMode === "bright"
+            ? "Lights: Bright"
+            : lightsMode === "medium"
+              ? "Lights: Medium"
+              : "Lights: Off"}
         </div>
       </button>
 
@@ -260,7 +261,7 @@ export default function GameControls() {
         >
           <Image className="w-4 h-4" />
           {/* Tooltip */}
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
             Wallpaper
           </div>
         </button>
@@ -326,7 +327,7 @@ export default function GameControls() {
         >
           <Sparkles className="w-4 h-4" />
           {/* Tooltip */}
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
             Decorators
           </div>
         </button>
@@ -347,14 +348,14 @@ export default function GameControls() {
               <h3 className="text-gray-800 font-semibold text-sm mb-3">
                 Add Decorator
               </h3>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                 {DECORATORS.map((decorator) => (
                   <button
                     key={decorator.id}
                     onClick={() => {
                       addDecorator(decorator.path);
                     }}
-                    className="group relative aspect-square p-2 rounded-lg overflow-hidden transition-all hover:scale-105 transform border-2 border-gray-300 hover:border-blue-400 bg-white"
+                    className="group relative aspect-square p-2 rounded-lg overflow-hidden transition-all hover:scale-105 transform"
                   >
                     <img
                       src={decorator.path}
@@ -362,7 +363,7 @@ export default function GameControls() {
                       className="w-full h-full object-contain"
                     />
                     {/* Tooltip */}
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 px-2 py-1 rounded bg-gray-800 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                       {decorator.name}
                     </div>
                   </button>

@@ -24,12 +24,6 @@ body {
   font-family: var(--font-montserrat), sans-serif;
 }
 
-/* Fishing Net Cursor */
-.fishing-net-cursor,
-.fishing-net-cursor * {
-  cursor: url('/icons/fishing-net.svg') 16 16, crosshair !important;
-}
-
 /* Liquid Glass Effect Enhancement */
 .glass-panel {
   backdrop-filter: blur(20px) saturate(180%);
@@ -39,6 +33,237 @@ body {
       rgba(255, 255, 255, 0.05) 100%);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Caustic Light Effect Layer */
+.caustic-light-layer {
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(100, 200, 255, 0.15) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 30%, rgba(150, 220, 255, 0.1) 0%, transparent 35%),
+    radial-gradient(ellipse at 40% 60%, rgba(100, 180, 255, 0.12) 0%, transparent 38%),
+    radial-gradient(ellipse at 70% 80%, rgba(120, 200, 255, 0.08) 0%, transparent 30%);
+  animation: causticLight 8s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: screen;
+}
+
+/* Light Particles - Floating light effect */
+.light-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+}
+
+.light-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(200, 240, 255, 0.8) 0%, rgba(150, 220, 255, 0.4) 50%, transparent 100%);
+  border-radius: 50%;
+  filter: blur(1px);
+  animation: floatParticle 15s linear infinite;
+  box-shadow: 0 0 6px rgba(200, 240, 255, 0.6);
+}
+
+.light-particle:nth-child(1) {
+  left: 15%;
+  top: 20%;
+  animation-delay: 0s;
+  animation-duration: 12s;
+}
+
+.light-particle:nth-child(2) {
+  left: 45%;
+  top: 50%;
+  animation-delay: 3s;
+  animation-duration: 16s;
+  width: 6px;
+  height: 6px;
+}
+
+.light-particle:nth-child(3) {
+  left: 75%;
+  top: 10%;
+  animation-delay: 6s;
+  animation-duration: 14s;
+}
+
+.light-particle:nth-child(4) {
+  left: 25%;
+  top: 70%;
+  animation-delay: 2s;
+  animation-duration: 18s;
+  width: 5px;
+  height: 5px;
+}
+
+.light-particle:nth-child(5) {
+  left: 60%;
+  top: 35%;
+  animation-delay: 8s;
+  animation-duration: 13s;
+}
+
+.light-particle:nth-child(6) {
+  left: 85%;
+  top: 60%;
+  animation-delay: 4s;
+  animation-duration: 17s;
+  width: 7px;
+  height: 7px;
+}
+
+@keyframes floatParticle {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translate(30px, -50vh) scale(1.2);
+    opacity: 0.6;
+  }
+
+  90% {
+    opacity: 0.4;
+  }
+
+  100% {
+    transform: translate(-20px, -100vh) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* Underwater Surface Layer - Viewed from below */
+.underwater-surface-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+}
+
+/* Primary texture layer with ripple distortion */
+.surface-texture-primary {
+  position: absolute;
+  top: -30px;
+  left: -15%;
+  width: 130%;
+  height: 150%;
+  background-image: url('/base/water_pool-water-texture.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.35;
+  filter: blur(1px) brightness(1.3) contrast(1.2);
+  animation: surfaceRipple 6s ease-in-out infinite;
+  mix-blend-mode: screen;
+  transform-origin: center top;
+}
+
+/* Secondary texture layer with different timing */
+.surface-texture-secondary {
+  position: absolute;
+  top: -20px;
+  left: -10%;
+  width: 120%;
+  height: 130%;
+  background-image: url('/base/water_pool-water-texture.jpg');
+  background-size: 130% auto;
+  background-position: center;
+  opacity: 0.28;
+  filter: blur(2px) brightness(1.5) contrast(1.1);
+  animation: surfaceRipple 8s ease-in-out infinite reverse;
+  mix-blend-mode: overlay;
+  transform-origin: center top;
+}
+
+/* Caustics overlay for light refraction */
+.surface-caustics-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at 25% 20%, rgba(150, 230, 255, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 65% 25%, rgba(180, 240, 255, 0.25) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 30%, rgba(160, 235, 255, 0.28) 0%, transparent 48%),
+    radial-gradient(ellipse at 40% 35%, rgba(140, 220, 255, 0.22) 0%, transparent 42%);
+  animation: causticsDance 6s ease-in-out infinite;
+  mix-blend-mode: screen;
+  filter: blur(8px);
+}
+
+/* Surface ripple animation */
+@keyframes surfaceRipple {
+
+  0%,
+  100% {
+    transform: scale(1) translateY(0) translateX(0) rotateZ(0deg);
+  }
+
+  25% {
+    transform: scale(1.08) translateY(-4px) translateX(2%) rotateZ(1deg);
+  }
+
+  50% {
+    transform: scale(0.95) translateY(5px) translateX(-3%) rotateZ(-0.8deg);
+  }
+
+  75% {
+    transform: scale(1.05) translateY(-3px) translateX(1%) rotateZ(0.6deg);
+  }
+}
+
+/* Caustics dance animation */
+@keyframes causticsDance {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+
+  33% {
+    transform: translate(5%, -3%) scale(1.08);
+    opacity: 1;
+  }
+
+  66% {
+    transform: translate(-3%, 2%) scale(0.95);
+    opacity: 0.85;
+  }
+}
+
+/* Water surface refraction layer */
+.water-surface-refraction {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  pointer-events: none;
+  z-index: 2;
+  overflow: hidden;
+  mix-blend-mode: screen;
 }
 
 /* Ocean Animation Styles */
@@ -96,6 +321,25 @@ body {
   animation: bubbles-sway 10s linear infinite;
 }
 
+/* Cinematic vignette overlay */
+.cinematic-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 8;
+  background:
+    radial-gradient(ellipse at center,
+      transparent 20%,
+      rgba(0, 15, 35, 0.15) 50%,
+      rgba(0, 10, 25, 0.35) 75%,
+      rgba(0, 5, 15, 0.5) 100%);
+  mix-blend-mode: multiply;
+  opacity: 0.7;
+}
+
 /* Fish Tank Styles */
 .fish-tank-container {
   width: 90%;
@@ -136,26 +380,129 @@ body {
 /* Air gap at top of tank */
 .fish-tank-air-gap {
   height: 30px;
-  background: transparent;
-  border-bottom: 2px solid rgba(100, 180, 255, 0.3);
+  background: linear-gradient(180deg,
+      rgba(200, 230, 255, 0.08) 0%,
+      rgba(150, 200, 240, 0.05) 50%,
+      transparent 100%);
+  border-bottom: none;
   position: relative;
   flex-shrink: 0;
+  overflow: visible;
+  box-shadow: 0 2px 8px rgba(100, 180, 255, 0.3);
 }
 
+/* Animated wavy distortion at bottom of air gap */
 .fish-tank-air-gap::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(100, 200, 255, 0.6) 20%,
-      rgba(150, 220, 255, 0.4) 50%,
-      rgba(100, 200, 255, 0.6) 80%,
-      transparent 100%);
-  animation: waterSurface 3s ease-in-out infinite;
+  bottom: -6px;
+  left: -5%;
+  width: 110%;
+  height: 12px;
+  background:
+    radial-gradient(ellipse 35px 8px at 8% 50%, rgba(100, 180, 255, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse 40px 7px at 25% 50%, rgba(120, 200, 255, 0.5) 0%, transparent 50%),
+    radial-gradient(ellipse 32px 9px at 45% 50%, rgba(100, 180, 255, 0.55) 0%, transparent 50%),
+    radial-gradient(ellipse 38px 7px at 65% 50%, rgba(110, 190, 255, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse 35px 8px at 82% 50%, rgba(100, 180, 255, 0.5) 0%, transparent 50%),
+    radial-gradient(ellipse 36px 8px at 95% 50%, rgba(120, 200, 255, 0.55) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(100, 180, 255, 0.5) 0%, rgba(100, 180, 255, 0.3) 50%, transparent 100%);
+  animation: airGapWaveDistortion 3.5s ease-in-out infinite;
+  z-index: 5;
+  pointer-events: none;
+  filter: blur(1.5px);
+  box-shadow: 0 2px 6px rgba(100, 180, 255, 0.4);
+}
+
+/* New water surface animations */
+@keyframes waterSurfaceGlow {
+
+  0%,
+  100% {
+    transform: translateX(0) scaleX(1) scaleY(1);
+    opacity: 0.8;
+    filter: blur(2px) brightness(1);
+  }
+
+  25% {
+    transform: translateX(3%) scaleX(1.03) scaleY(1.1);
+    opacity: 0.9;
+    filter: blur(2.5px) brightness(1.1);
+  }
+
+  50% {
+    transform: translateX(-2%) scaleX(0.98) scaleY(0.95);
+    opacity: 0.85;
+    filter: blur(2px) brightness(1.05);
+  }
+
+  75% {
+    transform: translateX(2%) scaleX(1.02) scaleY(1.05);
+    opacity: 0.95;
+    filter: blur(2.2px) brightness(1.08);
+  }
+}
+
+@keyframes waterShimmer {
+
+  0%,
+  100% {
+    opacity: 0.85;
+    transform: scaleX(1) scaleY(1) translateY(0);
+  }
+
+  20% {
+    opacity: 0.95;
+    transform: scaleX(1.02) scaleY(1.15) translateY(-0.5px);
+  }
+
+  40% {
+    opacity: 0.9;
+    transform: scaleX(0.99) scaleY(0.9) translateY(0.5px);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scaleX(1.01) scaleY(1.1) translateY(-0.3px);
+  }
+
+  80% {
+    opacity: 0.88;
+    transform: scaleX(1) scaleY(0.95) translateY(0.2px);
+  }
+}
+
+@keyframes waterRipple1 {
+
+  0%,
+  100% {
+    transform: translateX(0) scaleX(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: translateX(5%) scaleX(1.05);
+    opacity: 0.9;
+  }
+}
+
+@keyframes waterRipple2 {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scaleX(1) scaleY(1);
+  }
+
+  33% {
+    opacity: 0.8;
+    transform: scaleX(1.02) scaleY(1.1);
+  }
+
+  66% {
+    opacity: 0.7;
+    transform: scaleX(0.98) scaleY(0.95);
+  }
 }
 
 @keyframes waterSurface {
@@ -177,10 +524,142 @@ body {
   flex: 1;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg,
-      rgba(0, 40, 80, 0.95) 0%,
-      rgba(0, 60, 100, 0.95) 50%,
-      rgba(0, 50, 90, 0.95) 100%);
+  background:
+    linear-gradient(135deg,
+      rgba(20, 80, 130, 0.25) 0%,
+      transparent 50%,
+      rgba(30, 90, 140, 0.2) 100%),
+    linear-gradient(180deg,
+      rgba(80, 150, 200, 0.5) 0%,
+      rgba(60, 130, 180, 0.6) 25%,
+      rgba(40, 110, 160, 0.7) 50%,
+      rgba(20, 90, 140, 0.8) 75%,
+      rgba(10, 70, 120, 0.85) 100%);
+}
+
+/* Animated wavy distortion at top of water */
+.fish-tank-water::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -5%;
+  width: 110%;
+  height: 25px;
+  background:
+    radial-gradient(ellipse 40px 12px at 10% 50%, rgba(0, 35, 75, 0.98) 0%, transparent 50%),
+    radial-gradient(ellipse 45px 10px at 30% 50%, rgba(5, 40, 80, 0.95) 0%, transparent 50%),
+    radial-gradient(ellipse 38px 14px at 50% 50%, rgba(0, 35, 75, 0.97) 0%, transparent 50%),
+    radial-gradient(ellipse 42px 11px at 70% 50%, rgba(5, 40, 80, 0.96) 0%, transparent 50%),
+    radial-gradient(ellipse 40px 13px at 90% 50%, rgba(0, 35, 75, 0.98) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(0, 35, 75, 0.9) 0%, transparent 100%);
+  animation: wavyEdgeDistortion 3s ease-in-out infinite;
+  z-index: 10;
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+/* Light rays from surface */
+.fish-tank-water::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  background:
+    linear-gradient(160deg, transparent 40%, rgba(100, 200, 255, 0.08) 42%, transparent 44%),
+    linear-gradient(145deg, transparent 50%, rgba(120, 210, 255, 0.06) 52%, transparent 54%),
+    linear-gradient(175deg, transparent 45%, rgba(90, 180, 255, 0.07) 47%, transparent 49%);
+  animation: lightRays 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: overlay;
+}
+
+@keyframes causticLight {
+
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 0.6;
+  }
+
+  25% {
+    transform: translate(-5%, 3%) rotate(2deg) scale(1.05);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translate(-2%, -2%) rotate(-1deg) scale(0.98);
+    opacity: 0.7;
+  }
+
+  75% {
+    transform: translate(3%, 2%) rotate(1deg) scale(1.03);
+    opacity: 0.75;
+  }
+}
+
+@keyframes lightRays {
+
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: translateY(-3%) scaleY(1.05);
+    opacity: 0.7;
+  }
+}
+
+@keyframes wavyEdgeDistortion {
+
+  0%,
+  100% {
+    transform: translateX(0) scaleY(1) scaleX(1);
+    filter: blur(2px);
+  }
+
+  25% {
+    transform: translateX(3%) scaleY(1.4) scaleX(0.98);
+    filter: blur(2.5px);
+  }
+
+  50% {
+    transform: translateX(-2%) scaleY(0.7) scaleX(1.02);
+    filter: blur(1.5px);
+  }
+
+  75% {
+    transform: translateX(-3%) scaleY(1.3) scaleX(0.99);
+    filter: blur(2.2px);
+  }
+}
+
+@keyframes airGapWaveDistortion {
+
+  0%,
+  100% {
+    transform: translateX(0) scaleY(1) scaleX(1);
+    filter: blur(1.5px);
+  }
+
+  25% {
+    transform: translateX(-2%) scaleY(1.5) scaleX(1.01);
+    filter: blur(2px);
+  }
+
+  50% {
+    transform: translateX(2%) scaleY(0.6) scaleX(0.99);
+    filter: blur(1.2px);
+  }
+
+  75% {
+    transform: translateX(-1.5%) scaleY(1.3) scaleX(1.02);
+    filter: blur(1.8px);
+  }
 }
 
 .fish-tank-inner {
@@ -190,6 +669,37 @@ body {
   overflow: hidden;
 }
 
+/* Bottom shadow for depth perception */
+.fish-tank-inner::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 25%;
+  background: linear-gradient(180deg,
+      transparent 0%,
+      rgba(0, 20, 40, 0.3) 60%,
+      rgba(0, 10, 30, 0.5) 100%);
+  pointer-events: none;
+  z-index: 7;
+}
+
+/* Top light fade */
+.fish-tank-inner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 15%;
+  background: linear-gradient(180deg,
+      rgba(150, 220, 255, 0.08) 0%,
+      transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Glass reflection effects */
 .fish-tank-glass-left {
   position: absolute;
@@ -197,12 +707,31 @@ body {
   top: 0;
   width: 80px;
   height: 100%;
-  background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.15) 0%,
-      rgba(255, 255, 255, 0.05) 50%,
+  background:
+    linear-gradient(90deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.08) 30%,
+      rgba(255, 255, 255, 0.03) 60%,
       transparent 100%);
   pointer-events: none;
   z-index: 10;
+  animation: glassShimmer 5s ease-in-out infinite;
+}
+
+.fish-tank-glass-left::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  background:
+    linear-gradient(135deg,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(200, 230, 255, 0.15) 40%,
+      transparent 70%);
+  filter: blur(8px);
+  animation: glassHighlight 6s ease-in-out infinite;
 }
 
 .fish-tank-glass-right {
@@ -211,12 +740,57 @@ body {
   top: 0;
   width: 80px;
   height: 100%;
-  background: linear-gradient(-90deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.03) 50%,
+  background:
+    linear-gradient(-90deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.06) 30%,
+      rgba(255, 255, 255, 0.02) 60%,
       transparent 100%);
   pointer-events: none;
   z-index: 10;
+  animation: glassShimmer 5s ease-in-out infinite reverse;
+}
+
+.fish-tank-glass-right::after {
+  content: '';
+  position: absolute;
+  bottom: 20%;
+  right: 0;
+  width: 100%;
+  height: 40%;
+  background:
+    linear-gradient(-135deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(200, 230, 255, 0.12) 40%,
+      transparent 70%);
+  filter: blur(10px);
+  animation: glassHighlight 7s ease-in-out infinite 1s;
+}
+
+@keyframes glassShimmer {
+
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes glassHighlight {
+
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: translateY(-5%);
+  }
 }
 
 /* Tank Stand */
@@ -424,4 +998,73 @@ body {
     transform: translateY(-80vh) translateX(-5px);
     opacity: 0;
   }
+}
+
+/* Lighting Mode Effects */
+
+/* Off Mode - Dimmed */
+.fish-tank-inner[data-lights="off"] .caustic-light-layer {
+  opacity: 0.2;
+  transition: opacity 0.7s ease-in-out;
+}
+
+.fish-tank-inner[data-lights="off"] .light-particles {
+  opacity: 0.3;
+  transition: opacity 0.7s ease-in-out;
+}
+
+.fish-tank-inner[data-lights="off"] .underwater-surface-layer {
+  opacity: 0.4;
+  transition: opacity 0.7s ease-in-out;
+}
+
+.fish-tank-inner[data-lights="off"] .water-surface-refraction {
+  opacity: 0.3;
+  transition: opacity 0.7s ease-in-out;
+}
+
+/* Medium Mode - Normal */
+.fish-tank-inner[data-lights="medium"] .caustic-light-layer {
+  opacity: 0.8;
+  transition: opacity 0.7s ease-in-out;
+}
+
+.fish-tank-inner[data-lights="medium"] .light-particles {
+  opacity: 0.85;
+  transition: opacity 0.7s ease-in-out;
+}
+
+.fish-tank-inner[data-lights="medium"] .underwater-surface-layer {
+  opacity: 0.9;
+  transition: opacity 0.7s ease-in-out;
+}
+
+.fish-tank-inner[data-lights="medium"] .water-surface-refraction {
+  opacity: 0.85;
+  transition: opacity 0.7s ease-in-out;
+}
+
+/* Bright Mode - Enhanced brightness and saturation */
+.fish-tank-inner[data-lights="bright"] .caustic-light-layer {
+  opacity: 1;
+  filter: brightness(1.25) saturate(1.3);
+  transition: all 0.7s ease-in-out;
+}
+
+.fish-tank-inner[data-lights="bright"] .light-particles {
+  opacity: 1;
+  filter: brightness(1.3) saturate(1.4);
+  transition: all 0.7s ease-in-out;
+}
+
+.fish-tank-inner[data-lights="bright"] .underwater-surface-layer {
+  opacity: 1;
+  filter: brightness(1.2) saturate(1.25);
+  transition: all 0.7s ease-in-out;
+}
+
+.fish-tank-inner[data-lights="bright"] .water-surface-refraction {
+  opacity: 1;
+  filter: brightness(1.2) saturate(1.2);
+  transition: all 0.7s ease-in-out;
 }

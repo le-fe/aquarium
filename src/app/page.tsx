@@ -8,8 +8,14 @@ import { useGameStore } from "@/stores/gameStore";
 import { useEffect, useRef } from "react";
 
 export default function Home() {
-  const { wallpaper, decorators, setSelectedItem, updateDecorator, moveMode } =
-    useGameStore();
+  const {
+    wallpaper,
+    decorators,
+    lightsMode,
+    setSelectedItem,
+    updateDecorator,
+    moveMode,
+  } = useGameStore();
 
   const dragStateRef = useRef<{
     isDragging: boolean;
@@ -116,9 +122,9 @@ export default function Home() {
       }}
     >
       {/* Top Panel - Header and Controls */}
-      <div className="z-20 p-2 flex-shrink-0">
+      <div className="z-20 p-2 shrink-0">
         <div
-          className="backdrop-blur-xl rounded-xl p-2 shadow-2xl border border-white/20"
+          className="backdrop-blur-xl rounded-xl p-2 shadow-2xl border border-white/20 max-w-5xl mx-auto"
           style={{
             background:
               "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)",
@@ -143,7 +149,7 @@ export default function Home() {
               <div className="fish-tank-glass-right"></div>
 
               {/* Aquarium content */}
-              <div className="fish-tank-inner">
+              <div className="fish-tank-inner" data-lights={lightsMode}>
                 <OceanBackground />
 
                 {/* Sand/Gravel at bottom */}
@@ -181,6 +187,40 @@ export default function Home() {
                 ))}
 
                 <Aquarium2D />
+
+                {/* Lighting Overlay - adjusts brightness based on lighting mode */}
+                {lightsMode === "bright" ? (
+                  <div
+                    className="absolute inset-0 pointer-events-none transition-all duration-700"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at 50% 0%, rgba(255, 255, 220, 0.35) 0%, rgba(220, 240, 255, 0.2) 40%, rgba(180, 220, 255, 0.1) 70%, transparent 100%)",
+                      filter: "brightness(1.35) saturate(1.3) contrast(1.05)",
+                      mixBlendMode: "screen",
+                      zIndex: 9,
+                    }}
+                  ></div>
+                ) : lightsMode === "medium" ? (
+                  <div
+                    className="absolute inset-0 pointer-events-none transition-all duration-700"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at 50% 0%, rgba(255, 255, 230, 0.12) 0%, rgba(200, 230, 255, 0.06) 50%, transparent 80%)",
+                      filter: "brightness(1.12) saturate(1.1)",
+                      mixBlendMode: "screen",
+                      zIndex: 9,
+                    }}
+                  ></div>
+                ) : (
+                  <div
+                    className="absolute inset-0 pointer-events-none transition-opacity duration-700"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, rgba(0, 10, 20, 0.7) 0%, rgba(0, 5, 15, 0.85) 100%)",
+                      zIndex: 9,
+                    }}
+                  ></div>
+                )}
               </div>
             </div>
           </div>

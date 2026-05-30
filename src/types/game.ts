@@ -15,7 +15,7 @@ export interface FishModel {
   path: string;
   swimDirection: "normal" | "vertical" | "horizontal";
   maxSpeed: number;
-  sizeRatio: number; // 0.5 = small, 1.0 = medium, 1.5 = large
+  sizeRatio: number; // Maximum size ratio (0.5 = small max, 1.0 = medium max, 1.5 = large max). Actual fish size will be 50-100% of this.
 }
 
 export interface Decorator {
@@ -38,8 +38,8 @@ export interface GameState {
   fish: Fish[];
   decorators: Decorator[];
   isRunning: boolean;
-  fishingNetMode: boolean;
   moveMode: boolean;
+  lightsMode: "off" | "medium" | "bright";
   aquariumWidth: number;
   aquariumHeight: number;
   wallpaper: string;
@@ -51,8 +51,8 @@ export interface GameState {
   removeDecorator: (id: string) => void;
   updateDecorator: (id: string, updates: Partial<Decorator>) => void;
   toggleRunning: () => void;
-  toggleFishingNet: () => void;
   toggleMoveMode: () => void;
+  cycleLightsMode: () => void;
   setAquariumSize: (width: number, height: number) => void;
   setWallpaper: (wallpaper: string) => void;
   setSelectedItem: (
@@ -109,9 +109,9 @@ export const DECORATORS: DecoratorModel[] = [
 
 export const FISH_MODELS: FishModel[] = [
   {
-    id: "yellowfish",
+    id: "yellow-fish",
     name: "Yellow Fish",
-    path: "/fish/yellowish.svg",
+    path: "/fish/yellow-fish.png",
     swimDirection: "normal",
     maxSpeed: 2.5,
     sizeRatio: 1.0,
@@ -131,22 +131,6 @@ export const FISH_MODELS: FishModel[] = [
     swimDirection: "normal",
     maxSpeed: 1.5,
     sizeRatio: 0.8,
-  },
-  {
-    id: "tiger-fish",
-    name: "Tiger Fish",
-    path: "/fish/tiger-fish.svg",
-    swimDirection: "normal",
-    maxSpeed: 2.0,
-    sizeRatio: 1.2,
-  },
-  {
-    id: "ami-fish",
-    name: "Ami Fish",
-    path: "/fish/ami-fish.svg",
-    swimDirection: "normal",
-    maxSpeed: 1.8,
-    sizeRatio: 0.9,
   },
   {
     id: "starfish",
@@ -179,14 +163,6 @@ export const FISH_MODELS: FishModel[] = [
     swimDirection: "normal",
     maxSpeed: 1.2,
     sizeRatio: 0.7,
-  },
-  {
-    id: "colorful-fish",
-    name: "Colorful Fish",
-    path: "/fish/colorful-fish.png",
-    swimDirection: "normal",
-    maxSpeed: 1.7,
-    sizeRatio: 1.1,
   },
   {
     id: "marine-fish",
@@ -253,11 +229,59 @@ export const FISH_MODELS: FishModel[] = [
     sizeRatio: 2.0,
   },
   {
-    id: "orange-blue-fish",
-    name: "Orange Blue Fish",
-    path: "/fish/orange-blue-fish.svg",
+    id: "red-sea-clown-tang-fish",
+    name: "Red Sea Clown Tang Fish",
+    path: "/fish/red-sea-clown-tang-fish.png",
+    swimDirection: "normal",
+    maxSpeed: 1.5,
+    sizeRatio: 0.6,
+  },
+  {
+    id: "red-sea-clown-tang-fish-2",
+    name: "Red Sea Clown Tang Fish 2",
+    path: "/fish/red-sea-clown-tang-fish-2.png",
+    swimDirection: "normal",
+    maxSpeed: 1.5,
+    sizeRatio: 0.6,
+  },
+  {
+    id: "tropical-fish",
+    name: "Tropical Fish",
+    path: "/fish/tropical-fish.png",
     swimDirection: "normal",
     maxSpeed: 1.5,
     sizeRatio: 0.9,
+  },
+  {
+    id: "angelfish-vibrant-yellow-and-blue-tropical-fish",
+    name: "Angelfish - Vibrant Yellow and Blue Tropical Fish",
+    path: "/fish/angelfish-vibrant-yellow-and-blue-tropical-fish.png",
+    swimDirection: "normal",
+    maxSpeed: 1.5,
+    sizeRatio: 1.2,
+  },
+  {
+    id: "blue-chromis",
+    name: "Blue Chromis",
+    path: "/fish/blue-chromis.png",
+    swimDirection: "normal",
+    maxSpeed: 1.5,
+    sizeRatio: 0.5,
+  },
+  {
+    id: "golden-fish",
+    name: "Golden Fish",
+    path: "/fish/golden-fish.png",
+    swimDirection: "normal",
+    maxSpeed: 1.5,
+    sizeRatio: 1.0,
+  },
+  {
+    id: "siamese-fish",
+    name: "Siamese Fish",
+    path: "/fish/siamese-fish.png",
+    swimDirection: "normal",
+    maxSpeed: 1.5,
+    sizeRatio: 0.8,
   },
 ];
